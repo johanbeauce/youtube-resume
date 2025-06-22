@@ -33,8 +33,8 @@ It fetches the video's transcript and uses a configurable Large Language Model (
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/your-username/helloworld
-cd helloworld
+git clone https://github.com/johanbeauce/youtube-resume.git
+cd youtube-resume
 poetry install
 ```
 
@@ -73,17 +73,42 @@ OUTPUT_LANGUAGE=fr
 
 ## 🧪 Usage
 
+## 🧪 Usage
+
+You can now pass one or more YouTube video IDs and configure transcript and summary languages via CLI:
+
 ```bash
-poetry run python main.py
+poetry run python main.py <video_id_1> <video_id_2> ... --languages <transcript_lang_1> <transcript_lang_2> --translate <summary_lang>
 ```
-- The transcript will be saved to transcript.json
-- The full transcript text and generated summary will be displayed in the terminal
+
+### 🔧 Examples
+```bash
+# One video, transcript in French preferred, summary in French
+poetry run python main.py eHMIKOYcqSw --languages fr en --translate fr
+
+# Multiple videos, default transcript language is English, summary in English
+poetry run python main.py abc123 def456 --languages en --translate en
+```
+
+- --languages accepts one or more language codes (in order of priority) for transcript selection.
+- --translate specifies the desired output language for the summary.
+- The transcript will be saved as <video_id>_transcript.json in the project folder.
+
 
 ## 📚 Output Example
 
 ```text
+🎬 Processing video: eHMIKOYcqSw
+✅ Transcript for eHMIKOYcqSw saved to eHMIKOYcqSw_transcript.json
+
+📄 Transcript content:
+Bonjour à tous, aujourd'hui on va parler d'algorithmes et de structures de données...
+
+🧠 Generating summary in fr using llama3.2:3b (ollama)...
+
 📚 Summary:
-- This video explains key concepts in algorithm design...
+- Cette vidéo explique les concepts fondamentaux des algorithmes en utilisant des exemples concrets.
+- Elle aborde les structures comme les piles, files, listes chaînées, et leur utilité dans la résolution de problèmes.
 ```
 
 ## 🧼 Project Structure
