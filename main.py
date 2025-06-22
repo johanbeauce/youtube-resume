@@ -5,6 +5,7 @@ import openai
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import JSONFormatter
+from urllib.parse import urlparse, parse_qs
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,6 +15,21 @@ MODEL_NAME = os.getenv("LLM_MODEL", "llama3.2:3b")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+
+
+def extract_video_id(url_or_id: str) -> str:
+    """
+    Extract the YouTube video ID from a full URL or return the ID as-is if already clean.
+
+    Examples:
+    - https://www.youtube.com/watch?v=DQdB7wFEygo&t=48s → DQdB7wFEygo
+    - DQdB7wFEygo → DQdB7wFEygo
+    """
+    if "youtube.com" in url_or_id:
+        parsed_url = urlparse(url_or_id)
+        query_params = parse_qs(parsed_url.query)
+        return query_params.get("v", [""])[0]
+    return url_or_id    
 
 def fetch_transcript_text(video_id: str, languages: list[str]) -> str:
     """
@@ -71,7 +87,9 @@ def main():
     parser.add_argument("--translate", default="en", help="Output language for the summary")
     args = parser.parse_args()
 
-    for video_id in args.video_ids:
+    video_ids = extract_video_id(args.video_ids)
+
+    for video_id in video_ids:
         try:
             print(f"\n🎬 Processing video: {video_id}")
             full_text = fetch_transcript_text(video_id, args.languages)

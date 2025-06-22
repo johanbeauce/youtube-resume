@@ -63,23 +63,38 @@ OPENAI_API_KEY=sk-your-api-key
 
 # Optional: Customize Ollama endpoint
 OLLAMA_URL=http://localhost:11434/api/generate
-
-# Transcript and summary options
-VIDEO_ID=eHMIKOYcqSw
-OUTPUT_LANGUAGE=fr
 ```
 
 ⚠️ Do not include comments after values in your .env file (unlike Bash, they are not ignored).
 
 ## 🧪 Usage
 
-## 🧪 Usage
-
-You can now pass one or more YouTube video IDs and configure transcript and summary languages via CLI:
+### Via CLI
+You can pass one or more YouTube video IDs and configure transcript and summary languages via CLI:
 
 ```bash
 poetry run python main.py <video_id_1> <video_id_2> ... --languages <transcript_lang_1> <transcript_lang_2> --translate <summary_lang>
 ```
+
+### Via Web Page
+You can use the **web interface** to summarize one or more YouTube videos.
+
+Simply run the backend server:
+
+```bash
+poetry run uvicorn api:app --reload
+```
+
+Then open your browser at:
+
+📍 http://localhost:8000
+
+The interface allows you to:
+- Paste a YouTube video ID or full URL
+- Choose transcript language(s) (e.g. fr, en)
+- Select output language for the summary (e.g. fr, en)
+- View the summary rendered in markdown format
+- See a spinner while the model is working
 
 ### 🔧 Examples
 ```bash
@@ -97,6 +112,7 @@ poetry run python main.py abc123 def456 --languages en --translate en
 
 ## 📚 Output Example
 
+### Via CLI
 ```text
 🎬 Processing video: eHMIKOYcqSw
 ✅ Transcript for eHMIKOYcqSw saved to eHMIKOYcqSw_transcript.json
@@ -111,13 +127,24 @@ Bonjour à tous, aujourd'hui on va parler d'algorithmes et de structures de donn
 - Elle aborde les structures comme les piles, files, listes chaînées, et leur utilité dans la résolution de problèmes.
 ```
 
+### Via Web Page
+
+Once a video is processed, the summary will be rendered in a clean markdown format like:
+
+```markdown
+## Key Concepts Covered
+
+- This video explains fundamental algorithm design principles.
+- Topics include data structures like stacks, queues, and linked lists.
+- The summary is generated using a local or cloud-based LLM.
+```
+
 ## 🧼 Project Structure
 
 ```text
 .
 ├── main.py
 ├── .env
-├── transcript.json
 ├── pyproject.toml
 └── README.md
 ```

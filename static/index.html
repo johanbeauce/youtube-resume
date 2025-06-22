@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" x-init="init()">
+<head>
+  <meta charset="UTF-8" />
+  <title>YouTube Video Summarizer</title>
+
+  <!-- Alpine.js -->
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-dark.min.css" />
+</head>
+<body>
+  <h1>YouTube Video Summarizer</h1>
+
+  <p>
+    <label for="videoId">YouTube Video ID:</label>
+    <input type="text" id="videoId" x-model="videoId" placeholder="eHMIKOYcqSw" />
+  </p>
+
+  <p>
+    <label for="language">Transcript Language(s):</label>
+    <input type="text" id="language" x-model="languages" placeholder="en" />
+  </p>
+
+  <p>
+    <label for="translate">Summary Language:</label>
+    <input type="text" id="translate" x-model="translate" placeholder="en" />
+  </p>
+
+  <button @click="summarize">Summarize</button>
+
+  <div x-show="loading" class="spinner"></div>
+
+    <template x-if="summary">
+    <div>
+        <h2>📚 Summary</h2>
+        <div x-html="parsedSummary" class="markdown-output"></div>
+    </div>
+    </template>
+
+    <div x-html="parsedSummary" class="markdown-body"></div>
+
+  <template x-if="error">
+    <div style="color: red; margin-top: 1rem;">
+      <strong>Error:</strong> <span x-text="error"></span>
+    </div>
+  </template>
+
+  <!-- External JS -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
