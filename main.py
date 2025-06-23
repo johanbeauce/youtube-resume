@@ -17,77 +17,56 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 
-def extract_video_id(url_or_id: str) -> str:
-    """
-    Extract the YouTube video ID from a full URL or return the ID as-is if already clean.
-
-    Examples:
-    - https://www.youtube.com/watch?v=DQdB7wFEygo&t=48s → DQdB7wFEygo
-    - DQdB7wFEygo → DQdB7wFEygo
-    """
+def extract_video_ids(url_or_id: str) -> str:
     if "youtube.com" in url_or_id:
         parsed_url = urlparse(url_or_id)
         query_params = parse_qs(parsed_url.query)
         return query_params.get("v", [""])[0]
-    return url_or_id    
+    return url_or_id
 
 def fetch_transcript_text(video_id: str, languages: list[str]) -> str:
-    """
-    Fetch the transcript from a YouTube video and return the full concatenated text.
-    Also saves the transcript in JSON format locally.
-    """
-    formatter = JSONFormatter()
-    transcript = YouTubeTranscriptApi().fetch(video_id, languages=languages)
-
-    # save in JSON format
-    json_text = formatter.format_transcript(transcript)
-    with open("transcript.json", "w", encoding="utf-8") as f:
-        f.write(json_text)
-
-    print("Transcript saved to transcript.json")
-
-    # contact text content
-    return " ".join(snippet.text for snippet in transcript)
+    video_transcription = YouTubeTranscriptApi().fetch(video_id, languages=languages)
+    return " ".join(snippet.text for snippet in video_transcription)
 
 def summarize_with_llm(text: str, output_language: str) -> str:
-    """
-    Send the transcript to the selected LLM backend and return the summary.
-    """
-    prompt = f"Give me a resume in markdown format of this video transcription in {output_language}:\n\n{text}"
+    prompt = f"You are given a transcription of a YouTube video. Please provide: 1.	A concise summary in {output_language} (maximum 250 words). 2.	A structured report of the transcription in {output_language}, using markdown format (titles, bullet points, etc.). Make sure everything is written in {output_language} and clearly formatted. \"\"\"{text}\"\"\""
 
     if LLM_BACKEND == "ollama":
-        response = requests.post(OLLAMA_URL, json={
+        return summarizeWithOllama(prompt)
+    elif LLM_BACKEND == "openai":
+        return summarizeWithOpenai(prompt)
+    else:
+        raise ValueError(f"Unsupported LLM_BACKEND: {LLM_BACKEND}")
+
+def summarizeWithOpenai(prompt) :
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY is not set in the environment.")
+        
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
+    response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+    return response.choices[0].message.content.strip()
+
+def summarizeWithOllama(prompt):
+    response = requests.post(OLLAMA_URL, json={
             "model": MODEL_NAME,
             "prompt": prompt,
             "stream": False
         })
-        if response.status_code != 200:
-            raise RuntimeError(f"Ollama API call failed: {response.text}")
-        return response.json()["response"]
-
-    elif LLM_BACKEND == "openai":
-        if not OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY is not set in the environment.")
-        openai.api_key = OPENAI_API_KEY
-        response = openai.ChatCompletion.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.choices[0].message.content.strip()
-
-    else:
-        raise ValueError(f"Unsupported LLM_BACKEND: {LLM_BACKEND}")
+    if response.status_code != 200:
+        raise RuntimeError(f"Ollama API call failed: {response.text}")
+    return response.json()["response"]
 
 def main():
 
     # CLI argument parsing
-    parser = argparse.ArgumentParser(description="Summarize one or more YouTube videos using a transcript and an LLM.")
-    parser.add_argument("video_ids", nargs="+", help="One or more YouTube video IDs")
-    parser.add_argument("--languages", nargs="+", default=["en"], help="Transcript language(s) to try (priority order)")
-    parser.add_argument("--translate", default="en", help="Output language for the summary")
-    args = parser.parse_args()
-
-    video_ids = extract_video_id(args.video_ids)
+    args = parseCliArguments()
+    video_ids = extract_video_ids(args.video_ids)
 
     for video_id in video_ids:
         try:
@@ -104,6 +83,13 @@ def main():
 
         except Exception as e:
             print(f"❌ Error processing {video_id}: {e}")
+
+def parseCliArguments():
+    parser = argparse.ArgumentParser(description="Summarize one or more YouTube videos using a transcript and an LLM.")
+    parser.add_argument("video_ids", nargs="+", help="One or more YouTube video IDs")
+    parser.add_argument("--languages", nargs="+", default=["en"], help="Transcript language(s) to try (priority order)")
+    parser.add_argument("--translate", default="en", help="Output language for the summary")
+    return parser.parse_args()
 
 if __name__ == "__main__":
     main()

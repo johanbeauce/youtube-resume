@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List
-from main import fetch_transcript_text, summarize_with_llm, extract_video_id
+from main import fetch_transcript_text, summarize_with_llm, extract_video_ids
 
 app = FastAPI(title="YouTube Video Summarizer API")
 
@@ -30,7 +30,7 @@ def summarize_video(request: VideoRequest):
     
     results = {}
 
-    video_ids = [extract_video_id(v) for v in request.video_ids]
+    video_ids = [extract_video_ids(v) for v in request.video_ids]
 
     for video_id in video_ids:
         try:

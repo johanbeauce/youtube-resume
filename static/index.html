@@ -34,10 +34,21 @@
 
   <div x-show="loading" class="spinner"></div>
 
-    <template x-if="summary">
-    <div>
-        <h2>📚 Summary</h2>
-        <div x-html="parsedSummary" class="markdown-output"></div>
+    <template x-if="transcript">
+    <div class="transcript-box" x-data="{ open: false }">
+        <button @click="open = !open" style="margin-bottom: 0.5rem;">
+        <span x-text="open ? 'Hide Transcript' : 'Show Transcript'"></span>
+        </button>
+
+        <template x-if="open">
+        <div x-transition>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>📄 Transcript</h3>
+            <button @click="copyTranscript" class="copy-btn">📋 Copy</button>
+            </div>
+            <pre x-ref="transcriptBlock" x-text="transcript"></pre>
+        </div>
+        </template>
     </div>
     </template>
 

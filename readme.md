@@ -143,10 +143,18 @@ Once a video is processed, the summary will be rendered in a clean markdown form
 
 ```text
 .
-├── main.py
-├── .env
-├── pyproject.toml
-└── README.md
+├── api.py                       # FastAPI app with REST + web interface routes
+├── main.py                      # Transcript fetching and LLM summarization logic
+├── .env                         # Configuration (LLM backend, model name, API key, etc.)
+├── pyproject.toml               # Poetry project config
+├── test_main.py                 # Unit test for extract_video_id()
+├── transcript.json              # Transcript output (per video), saved dynamically
+├── static/                      # Web interface (HTML, CSS, JS)
+│   ├── index.html               # Main HTML frontend using Alpine.js
+│   ├── style.css                # Dark theme styling
+│   ├── app.js                   # Frontend logic (fetch, spinner, rendering)
+│   └── image.png                # Screenshot used in README.md
+└── README.md                    # Documentation and usage guide
 ```
 
 ## 📄 License
