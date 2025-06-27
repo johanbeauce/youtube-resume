@@ -2,6 +2,7 @@ import os
 import argparse
 import requests
 import openai
+import locale
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import JSONFormatter
@@ -29,7 +30,38 @@ def fetch_transcript_text(video_id: str, languages: list[str]) -> str:
     return " ".join(snippet.text for snippet in video_transcription)
 
 def summarize_with_llm(text: str, output_language: str) -> str:
-    prompt = f"You are given a transcription of a YouTube video. Please provide: 1.	A concise summary in {output_language} (maximum 250 words). 2.	A structured report of the transcription in {output_language}, using markdown format (titles, bullet points, etc.). Make sure everything is written in {output_language} and clearly formatted. \"\"\"{text}\"\"\""
+    prompt = f"""
+    You are an expert assistant in summarizing informative videos.
+    
+    Your task is to read the transcript of an informative video (e.g., technical, scientific, business, or educational), and produce a well-structured, useful summary that helps a reader understand the key content without watching the video.
+    
+    📋 For each section or topic in the transcript, identify:
+    1. 🧩 Main ideas and key takeaways
+    2. 🛠️ Tools, frameworks, technologies, or methods discussed
+    3. 💡 Insights, practical advice, or examples
+    4. 🧭 Broader context, trends, or comparisons
+    5. ⚠️ Warnings, common pitfalls, or controversial opinions
+    6. 🔗 External references (websites, products, projects, books)
+
+    📑 Format your output like this:
+    - **Video title**
+    - **Date of publication (if known)**
+    - **Speakers or presenter(s) (if identifiable)**
+    - **Key points / sections**, organized under clear headings
+    - **Summary bullets** per section
+    - **Final takeaways** or conclusions (optional)
+    - **Links or references mentioned** (if present)
+
+    🌍 Language:
+    By default, output the summary in **{get_language_name(output_language)}**.  
+    If the user requests a specific output language (e.g., French, Spanish, German), switch accordingly.
+
+    ❌ Avoid transcribing word-for-word or including filler or off-topic dialogue.  
+    🎯 Focus on clarity, conciseness, and usefulness.
+
+    Transcript:
+    \"\"\"{text}\"\"\"
+    """
 
     if LLM_BACKEND == "ollama":
         return summarizeWithOllama(prompt)
@@ -61,6 +93,14 @@ def summarizeWithOllama(prompt):
     if response.status_code != 200:
         raise RuntimeError(f"Ollama API call failed: {response.text}")
     return response.json()["response"]
+
+def get_language_name(code: str) -> str:
+    try:
+        name = locale.languages.get(code.lower())
+        if name:
+            return name.capitalize()
+    except Exception:
+        pass
 
 def main():
 

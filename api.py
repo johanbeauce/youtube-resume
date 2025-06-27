@@ -10,7 +10,7 @@ app = FastAPI(title="YouTube Video Summarizer API")
 # Serve the static HTML page
 @app.get("/", response_class=FileResponse)
 def serve_index():
-    return "static/index.html"
+    return FileResponse("static/index.html")
 
 # Serve any additional static files (JS, CSS, etc.)
 app.mount("/static", StaticFiles(directory="static"), name="static")

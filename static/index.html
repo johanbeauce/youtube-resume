@@ -1,66 +1,75 @@
 <!DOCTYPE html>
 <html lang="en" x-data="app()" x-init="init()">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>YouTube Video Summarizer</title>
+    <meta charset="UTF-8" />
+    <title>YouTube Video Summarizer</title>
 
-  <!-- Alpine.js -->
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- External CSS -->
-  <link rel="stylesheet" href="/static/style.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-dark.min.css" />
+    <!-- External CSS -->
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-dark.min.css" />
 </head>
+
 <body>
-  <h1>YouTube Video Summarizer</h1>
+    <h1>YouTube Video Summarizer</h1>
 
-  <p>
-    <label for="videoId">YouTube Video ID:</label>
-    <input type="text" id="videoId" x-model="videoId" placeholder="eHMIKOYcqSw" />
-  </p>
+    <p>
+        <label for="videoId">YouTube Video ID:</label>
+        <input type="text" id="videoId" x-model="videoId" placeholder="eHMIKOYcqSw" />
+    </p>
 
-  <p>
-    <label for="language">Transcript Language(s):</label>
-    <input type="text" id="language" x-model="languages" placeholder="en" />
-  </p>
+    <p>
+        <label for="language">Transcript Language(s):</label>
+        <select id="language" x-model="languages">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+        </select>
+    </p>
 
-  <p>
-    <label for="translate">Summary Language:</label>
-    <input type="text" id="translate" x-model="translate" placeholder="en" />
-  </p>
+    <p>
+        <label for="translate">Summary Language:</label>
+        <select id="translate" x-model="translate">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+        </select>
+    </p>
 
-  <button @click="summarize">Summarize</button>
+    <button @click="summarize">Summarize</button>
 
-  <div x-show="loading" class="spinner"></div>
+    <div x-show="loading" class="spinner"></div>
 
     <template x-if="transcript">
-    <div class="transcript-box" x-data="{ open: false }">
-        <button @click="open = !open" style="margin-bottom: 0.5rem;">
-        <span x-text="open ? 'Hide Transcript' : 'Show Transcript'"></span>
-        </button>
+        <div class="transcript-box" x-data="{ open: false }">
+            <button @click="open = !open" style="margin-bottom: 0.5rem;">
+                <span x-text="open ? 'Hide Transcript' : 'Show Transcript'"></span>
+            </button>
 
-        <template x-if="open">
-        <div x-transition>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>📄 Transcript</h3>
-            <button @click="copyTranscript" class="copy-btn">📋 Copy</button>
-            </div>
-            <pre x-ref="transcriptBlock" x-text="transcript"></pre>
+            <template x-if="open">
+                <div x-transition>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>📄 Transcript</h3>
+                        <button @click="copyTranscript" class="copy-btn">📋 Copy</button>
+                    </div>
+                    <pre x-ref="transcriptBlock" x-text="transcript"></pre>
+                </div>
+            </template>
         </div>
-        </template>
-    </div>
     </template>
 
     <div x-html="parsedSummary" class="markdown-body"></div>
 
-  <template x-if="error">
-    <div style="color: red; margin-top: 1rem;">
-      <strong>Error:</strong> <span x-text="error"></span>
-    </div>
-  </template>
+    <template x-if="error">
+        <div style="color: red; margin-top: 1rem;">
+            <strong>Error:</strong> <span x-text="error"></span>
+        </div>
+    </template>
 
-  <!-- External JS -->
-  <script src="/static/app.js"></script>
+    <!-- External JS -->
+    <script src="/static/app.js"></script>
 </body>
+
 </html>
